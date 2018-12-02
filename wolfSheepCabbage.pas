@@ -1,4 +1,4 @@
-program wolfSheepCabbage;
+program WolfSheepCabbage;
 
 uses
   SysUtils;
