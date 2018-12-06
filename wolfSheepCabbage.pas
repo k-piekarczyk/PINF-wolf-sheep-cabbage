@@ -229,7 +229,7 @@ begin
                     search := ELegal;
             end;
 
-            if (showFailed) then
+            if (showFailed and (search = ELegal)) then
             begin
                 TextColor(DarkGray);
                 write('- :do dna ', depth, ':  ', stack2str(stk));
