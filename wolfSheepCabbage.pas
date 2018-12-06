@@ -1,7 +1,7 @@
 program WolfSheepCabbage;
 
 uses  
-    SysUtils;
+    SysUtils, Crt;
 
 type
     bank = (BLeft, BRight);
@@ -68,14 +68,6 @@ type
             stk := stk^.next;
             stack2str := stack2str + ' -> ' + state2str(stk^.gameState);
         end;
-    end;
-
-    function eval2str(ev: eval) : string;
-    begin
-        if (ev = EDone) then
-            eval2str := 'znaleziono rozwiazanie'
-        else
-           eval2str := 'nie znaleziono rozwiazania' 
     end;
 
     { Stack manipulation }
@@ -193,7 +185,7 @@ begin
         genStates := appendMove(genStates, s.cabbage, oppositeBank(s.cabbage), MCabbage);
 end;
 
-function search(s: state; depth: byte; stk: stackptr) : eval;
+function search(s: state; depth: byte; stk: stackptr; showFailed: boolean) : eval;
 var
     mvptr, x: moveptr;
     nextState: state;
@@ -202,7 +194,12 @@ begin
     search := stateEval(s);
 
     if (search = EDone) then
-        writeln('+ :poziom ', depth, ':  ', stack2str(stk))
+    begin
+        TextColor(Green);
+        write('+ :do dna ', depth, ':  ', stack2str(stk));
+        TextColor(White);
+        write(#10);
+    end 
     else
     if((depth > 0) and (search <> EIllegal)) then
     begin
@@ -222,7 +219,7 @@ begin
                 nextState.cabbage := oppositeBank(nextState.cabbage);
 
             stk := appendState(stk, nextState);
-            ev := search(nextState, depth - 1, stk);
+            ev := search(nextState, depth - 1, stk, showFailed);
 
             if (search <> EDone) then
             begin
@@ -232,7 +229,14 @@ begin
                     search := ELegal;
             end;
 
-            writeln(#9'- :poziom ', depth, ':  ', stack2str(stk));
+            if (showFailed) then
+            begin
+                TextColor(DarkGray);
+                write('- :do dna ', depth, ':  ', stack2str(stk));
+                TextColor(White);
+                write(#10);
+            end;
+
             stk := popState(stk);
             mvptr := mvptr^.next;
         end;
@@ -241,26 +245,45 @@ begin
     end;
 end;
 
-function searchSolution(s: state; depth: byte) : eval;
+function searchSolution(s: state; depth: byte; showFailed: boolean) : eval;
 var
     stk: stackptr;
 begin
     stk := appendState(nil, s);
-    searchSolution := search(s, depth, stk);
+    searchSolution := search(s, depth, stk, showFailed);
     tearDownStack(stk);    
 end;
 
 { Main }
 var
-    depth: byte;
+    depth, argumentOffset: byte;
+    showFailed: boolean;
     s: state;
     ev: eval;
 
 begin
     depth := 7;
+    argumentOffset := 0;
+    showFailed := true;
 
-    if (ParamCount > 0) then
-        depth := StrToInt(ParamStr(1));
+    if ((ParamCount <> 0) and (ParamCount <> 2) and (ParamCount <> 4)) then
+    begin
+        writeln('Dostepne opcje:');
+        writeln(#9'-h {"true", "false"}: ukryj nieudane przejscia');
+        writeln(#9'-d <byte>: glebokosc poszukiwania rozwiazania');
+        exit;
+    end;
+
+    while (argumentOffset <> ParamCount) do
+    begin
+        if ((ParamStr(argumentOffset+1) = '-h') and (ParamStr(argumentOffset+2) = 'true')) then
+            showFailed := false;
+        if (ParamStr(argumentOffset+1) = '-d') then
+            depth := StrToInt(ParamStr(argumentOffset+2));
+        
+        argumentOffset := argumentOffset + 2;
+    end;
+
 
     writeln('Poszukuje rozwiazania z glebokoscia przeszukiwania ', depth);
 
@@ -269,6 +292,19 @@ begin
     s.cabbage := BLeft;
     s.farmer := BLeft;
 
-    ev := searchSolution(s, depth);
-    writeln('Wynik: ', eval2str(ev));
+    ev := searchSolution(s, depth, showFailed);
+
+    write('Wynik: ');
+    if (ev = EDone) then
+    begin
+        TextColor(Green);
+        write('znaleziono rozwiazania!');
+        TextColor(White);
+    end else
+    begin
+        TextColor(Red);
+        write('nie znaleziono rozwiazan...');
+        TextColor(White);
+    end;
+    write(#10);
 end.
