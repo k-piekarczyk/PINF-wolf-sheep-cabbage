@@ -1,7 +1,7 @@
 program WolfSheepCabbage;
 
-uses
-  SysUtils;
+uses  
+    SysUtils;
 
 type
     bank = (BLeft, BRight);
@@ -202,7 +202,7 @@ begin
     search := stateEval(s);
 
     if (search = EDone) then
-        writeln('poziom ', depth, ':  ', stack2str(stk))
+        writeln('+ :poziom ', depth, ':  ', stack2str(stk))
     else
     if((depth > 0) and (search <> EIllegal)) then
     begin
@@ -232,6 +232,7 @@ begin
                     search := ELegal;
             end;
 
+            writeln(#9'- :poziom ', depth, ':  ', stack2str(stk));
             stk := popState(stk);
             mvptr := mvptr^.next;
         end;
