@@ -14,6 +14,6 @@ If there is no output on exectution, compile the SUBSTITUTE version and it shoul
 - h {true, false} : if true, doesn't display failed movesets
 
 ## Credits
-[Project repo](https://github.com/k-piekarczyk/PINF-wolf-sheep-cabbages)
+[Project repo](https://github.com/k-piekarczyk/PINF-wolf-sheep-cabbage)
 
 Made with ❤️ by [Krzysiek Piekarczyk](https://github.com/k-piekarczyk)
